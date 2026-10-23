@@ -1,14 +1,17 @@
 {
   "name": "svg-editor",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/src/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cli": "npm run build && node dist/src/main.js",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test dist/tests/CliApplication.test.js dist/tests/SvgPersistence.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A command-line SVG editor built with TypeScript and object-oriented design.",
   "devDependencies": {
     "@types/node": "^26.6.5",
     "tsx": "^4.23.15",
