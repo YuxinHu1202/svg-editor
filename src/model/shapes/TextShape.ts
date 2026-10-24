@@ -21,6 +21,13 @@ export class TextShape extends Shape {
     this.y *= factor;
   }
 
+  protected override getGeometryAttribute(name: string): string {
+    if (name === "x") return this.formatNumber(this.x);
+    if (name === "y") return this.formatNumber(this.y);
+    if (name === "text") return this.text;
+    throw new EditorError(`unknown attribute: ${name}`);
+  }
+
   protected override setGeometryAttribute(name: string, value: string): void {
     if (name === "text") {
       this.text = value;
@@ -30,12 +37,6 @@ export class TextShape extends Shape {
     if (name === "x") this.x = number;
     else if (name === "y") this.y = number;
     else throw new EditorError(`unknown attribute: ${name}`);
-  }
-
-  public override clone(): TextShape {
-    const copy = new TextShape(this.id, this.x, this.y, this.text);
-    this.copyStylesTo(copy);
-    return copy;
   }
 
   public override toSvg(indent: number): string {

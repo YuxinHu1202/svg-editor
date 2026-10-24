@@ -28,10 +28,11 @@ export abstract class Shape {
     this.styles.set(name, value);
   }
 
-  protected copyStylesTo(target: Shape): void {
-    for (const [name, value] of this.styles) {
-      target.setStyle(name, value);
+  public getAttribute(name: string): string | undefined {
+    if (name === "fill" || name === "stroke" || name === "stroke-width") {
+      return this.styles.get(name);
     }
+    return this.getGeometryAttribute(name);
   }
 
   protected styleEntries(): Array<[string, string]> {
@@ -49,6 +50,16 @@ export abstract class Shape {
       this.setStyle(name, value);
       return;
     }
+    this.setGeometryAttribute(name, value);
+  }
+
+  public restoreAttribute(name: string, value: string | undefined): void {
+    if (name === "fill" || name === "stroke" || name === "stroke-width") {
+      if (value === undefined) this.styles.delete(name);
+      else this.setStyle(name, value);
+      return;
+    }
+    if (value === undefined) throw new EditorError(`cannot restore attribute without a value: ${name}`);
     this.setGeometryAttribute(name, value);
   }
 
@@ -86,10 +97,10 @@ export abstract class Shape {
       .join(" ");
   }
 
+  protected abstract getGeometryAttribute(name: string): string;
   protected abstract setGeometryAttribute(name: string, value: string): void;
   public abstract move(dx: number, dy: number): void;
   public abstract scale(factor: number): void;
-  public abstract clone(): Shape;
   public abstract toSvg(indent: number): string;
   public abstract summary(): string;
   public abstract detailLines(): string[];

@@ -1,5 +1,5 @@
 import { EditorError } from "../errors/EditorError.js";
-import type { DocumentSnapshot } from "./DocumentSnapshot.js";
+import type { ShapePlacement } from "./ShapePlacement.js";
 import { GroupShape } from "./shapes/GroupShape.js";
 import type { Shape } from "./shapes/Shape.js";
 
@@ -41,14 +41,9 @@ export class SvgDocument {
   }
 
   public add(shape: Shape, containerId?: string): void {
-    this.validateNewSubtree(shape);
-    if (containerId === undefined) {
-      shape.setParent(null);
-      this.rootShapes.push(shape);
-      return;
-    }
-    const container = this.requireContainer(containerId);
-    container.addChild(shape);
+    const parentId = containerId ?? null;
+    const index = parentId === null ? this.rootShapes.length : this.requireContainer(parentId).children.length;
+    this.insertAt(shape, parentId, index);
   }
 
   public requireShape(id: string): Shape {
@@ -69,9 +64,38 @@ export class SvgDocument {
   }
 
   public delete(id: string): Shape {
+    return this.removeWithLocation(id).shape;
+  }
+
+  public locationOf(id: string): ShapePlacement {
     const shape = this.requireShape(id);
+    return {
+      shape,
+      parentId: shape.parent?.id ?? null,
+      index: this.indexInParent(shape),
+    };
+  }
+
+  public removeWithLocation(id: string): ShapePlacement {
+    const placement = this.locationOf(id);
+    this.detach(placement.shape);
+    return placement;
+  }
+
+  public insertAt(shape: Shape, parentId: string | null, index: number): void {
+    this.validateNewSubtree(shape);
+    const parent = parentId === null ? null : this.requireContainer(parentId);
+    this.insert(shape, parent, index);
+  }
+
+  public relocate(id: string, parentId: string | null, index: number): void {
+    const shape = this.requireShape(id);
+    const parent = parentId === null ? null : this.requireContainer(parentId);
+    if (parent === shape || (shape instanceof GroupShape && parent && shape.containsDescendant(parent))) {
+      throw new EditorError(`cannot add a container into its own descendant: ${id}`);
+    }
     this.detach(shape);
-    return shape;
+    this.insert(shape, parent, index);
   }
 
   public group(newId: string, ids: string[]): GroupShape {
@@ -142,23 +166,6 @@ export class SvgDocument {
     const parent = shape.parent;
     this.detach(shape);
     this.insert(shape, parent, 0);
-  }
-
-  public snapshot(): DocumentSnapshot {
-    return {
-      width: this.widthValue,
-      height: this.heightValue,
-      sourcePath: this.sourcePathValue,
-      roots: this.rootShapes.map((shape) => shape.clone()),
-    };
-  }
-
-  public restore(snapshot: DocumentSnapshot): void {
-    this.widthValue = snapshot.width;
-    this.heightValue = snapshot.height;
-    this.sourcePathValue = snapshot.sourcePath;
-    this.rootShapes = snapshot.roots.map((shape) => shape.clone());
-    for (const root of this.rootShapes) root.setParent(null);
   }
 
   public countElements(): number {

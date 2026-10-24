@@ -19,18 +19,28 @@ export class CommandHistory {
     if (this.blocked) throw new EditorError("undo not allowed after io command");
     const command = this.undoStack.pop();
     if (!command) throw new EditorError("nothing to undo");
-    const result = command.undo(document);
-    this.redoStack.push(command);
-    return result;
+    try {
+      const result = command.undo(document);
+      this.redoStack.push(command);
+      return result;
+    } catch (error) {
+      this.undoStack.push(command);
+      throw error;
+    }
   }
 
   public redo(document: SvgDocument): string {
     if (this.blocked) throw new EditorError("undo not allowed after io command");
     const command = this.redoStack.pop();
     if (!command) throw new EditorError("nothing to redo");
-    const result = command.redo(document);
-    this.undoStack.push(command);
-    return result;
+    try {
+      const result = command.redo(document);
+      this.undoStack.push(command);
+      return result;
+    } catch (error) {
+      this.redoStack.push(command);
+      throw error;
+    }
   }
 
   public ioBarrier(): void {

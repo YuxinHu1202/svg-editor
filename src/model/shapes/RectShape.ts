@@ -27,6 +27,14 @@ export class RectShape extends Shape {
     this.height *= factor;
   }
 
+  protected override getGeometryAttribute(name: string): string {
+    if (name === "x") return this.formatNumber(this.x);
+    if (name === "y") return this.formatNumber(this.y);
+    if (name === "width") return this.formatNumber(this.width);
+    if (name === "height") return this.formatNumber(this.height);
+    throw new EditorError(`unknown attribute: ${name}`);
+  }
+
   protected override setGeometryAttribute(name: string, value: string): void {
     const number = this.parseNumber(name, value);
     if ((name === "width" || name === "height") && number < 0) {
@@ -37,12 +45,6 @@ export class RectShape extends Shape {
     else if (name === "width") this.width = number;
     else if (name === "height") this.height = number;
     else throw new EditorError(`unknown attribute: ${name}`);
-  }
-
-  public override clone(): RectShape {
-    const copy = new RectShape(this.id, this.x, this.y, this.width, this.height);
-    this.copyStylesTo(copy);
-    return copy;
   }
 
   public override toSvg(indent: number): string {

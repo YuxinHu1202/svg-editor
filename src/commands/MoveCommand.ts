@@ -15,4 +15,16 @@ export class MoveCommand extends EditingCommand {
     shape.move(this.dx, this.dy);
     return `${shape.type}#${shape.id} moved by (${this.dx},${this.dy})`;
   }
+
+  public override undo(document: SvgDocument): string {
+    this.ensureExecuted();
+    document.requireShape(this.id).move(-this.dx, -this.dy);
+    return this.undoResult();
+  }
+
+  public override redo(document: SvgDocument): string {
+    this.ensureExecuted();
+    document.requireShape(this.id).move(this.dx, this.dy);
+    return this.redoResult();
+  }
 }

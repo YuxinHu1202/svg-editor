@@ -46,15 +46,12 @@ export class GroupShape extends Shape {
     for (const child of this.childList) child.scale(factor);
   }
 
-  protected override setGeometryAttribute(name: string, _value: string): void {
+  protected override getGeometryAttribute(name: string): string {
     throw new EditorError(`unknown attribute: ${name}`);
   }
 
-  public override clone(): GroupShape {
-    const copy = new GroupShape(this.id);
-    this.copyStylesTo(copy);
-    for (const child of this.childList) copy.addChild(child.clone());
-    return copy;
+  protected override setGeometryAttribute(name: string, _value: string): void {
+    throw new EditorError(`unknown attribute: ${name}`);
   }
 
   public override toSvg(indent: number): string {

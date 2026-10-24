@@ -25,6 +25,14 @@ export class EllipseShape extends Shape {
     this.ry *= factor;
   }
 
+  protected override getGeometryAttribute(name: string): string {
+    if (name === "cx") return this.formatNumber(this.cx);
+    if (name === "cy") return this.formatNumber(this.cy);
+    if (name === "rx") return this.formatNumber(this.rx);
+    if (name === "ry") return this.formatNumber(this.ry);
+    throw new EditorError(`unknown attribute: ${name}`);
+  }
+
   protected override setGeometryAttribute(name: string, value: string): void {
     const number = this.parseNumber(name, value);
     if ((name === "rx" || name === "ry") && number < 0) {
@@ -35,12 +43,6 @@ export class EllipseShape extends Shape {
     else if (name === "rx") this.rx = number;
     else if (name === "ry") this.ry = number;
     else throw new EditorError(`unknown attribute: ${name}`);
-  }
-
-  public override clone(): EllipseShape {
-    const copy = new EllipseShape(this.id, this.cx, this.cy, this.rx, this.ry);
-    this.copyStylesTo(copy);
-    return copy;
   }
 
   public override toSvg(indent: number): string {

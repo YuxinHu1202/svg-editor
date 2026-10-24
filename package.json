@@ -6,7 +6,7 @@
     "cli": "npm run build && node dist/src/main.js",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && node --test dist/tests/CliApplication.test.js dist/tests/SvgPersistence.test.js"
+    "test": "npm run build && node --test dist/tests/CliApplication.test.js dist/tests/SvgPersistence.test.js dist/tests/TraditionalUndoRedo.test.js"
   },
   "keywords": [],
   "author": "",

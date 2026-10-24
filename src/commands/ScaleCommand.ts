@@ -16,4 +16,16 @@ export class ScaleCommand extends EditingCommand {
     shape.scale(this.factor);
     return `${shape.type}#${shape.id} scaled by ${this.factor}`;
   }
+
+  public override undo(document: SvgDocument): string {
+    this.ensureExecuted();
+    document.requireShape(this.id).scale(1 / this.factor);
+    return this.undoResult();
+  }
+
+  public override redo(document: SvgDocument): string {
+    this.ensureExecuted();
+    document.requireShape(this.id).scale(this.factor);
+    return this.redoResult();
+  }
 }
