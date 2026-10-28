@@ -97,6 +97,10 @@ export abstract class Shape {
       .join(" ");
   }
 
+  public positionSummary(): string | null {
+    return null;
+  }
+
   protected abstract getGeometryAttribute(name: string): string;
   protected abstract setGeometryAttribute(name: string, value: string): void;
   public abstract move(dx: number, dy: number): void;

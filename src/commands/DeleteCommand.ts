@@ -18,7 +18,8 @@ export class DeleteCommand extends EditingCommand {
     this.ensureExecuted();
     if (!this.placement) throw new Error("delete command state is missing");
     document.insertAt(this.placement.shape, this.placement.parentId, this.placement.index);
-    return this.undoResult();
+    const parent = this.placement.parentId === null ? "svg" : `g#${this.placement.parentId}`;
+    return `${this.placement.shape.type}#${this.placement.shape.id} restored into ${parent}`;
   }
 
   public override redo(document: SvgDocument): string {

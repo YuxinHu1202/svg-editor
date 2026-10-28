@@ -138,6 +138,23 @@ SVG 读回最初用一个 Map 同时计算所有图形的参数，读取 `<rect>
 
 边界审查发现：若无 ID 的 `<rect>` 出现在文件前部，而显式 `rect1` 在后部，逐行分配会抢占 `rect1`。读取器现先递归收集所有显式 ID，再为匿名元素选择未被保留的编号，并加入回归测试。
 
+### 7. 输出格式修改
+通过对给出的文档中的一个示例进行，发现move显示操作为，同时delete操作后进行undo的显示也是出现不一致的情况
+```text
+svg> move c1 30 0
+circle#c1 moved by (30,0)
+
+svg> delete box
+rect#box deleted
+svg> undo
+undid: rect#box deleted
+```
+但是命令内部的计算是正确的，按照增量进行计算，最后修改为正确的指示。对此，想表达使用agent等进行开发可以使得开发整体的正确性，但是对于一些小细节上的把握其实还是不够的。还是需要人工的参与。
+```text
+svg> move c1 30 0
+circle#c1 moved to (130,100)
+```
+
 ## 一致性自查
 
 ### 模块划分
@@ -166,7 +183,7 @@ SVG 读回最初用一个 Map 同时计算所有图形的参数，读取 `<rect>
 
 1. `npm run typecheck` 使用 TypeScript strict 模式、未检查索引检查、override 检查和完整返回检查。
 2. `npm run build` 验证全部生产代码和测试可编译。
-3. `npm test` 当前共有 **21 项自动化测试**，覆盖：六种内置图形、`in`、Composite 移动、group/ungroup、循环防护、front/back、set 白名单、失败原子性、传统逆操作 undo/redo、父容器与索引恢复、redo 清空、IO barrier、缺失 ID、重复 ID、保留显式 ID、XML 转义以及 save/read round-trip。
+3. `npm test` 当前共有 **22 项自动化测试**，覆盖：六种内置图形、`in`、Composite 移动、move 最终坐标反馈、delete 恢复位置反馈、group/ungroup、循环防护、front/back、set 白名单、失败原子性、传统逆操作 undo/redo、父容器与索引恢复、redo 清空、IO barrier、缺失 ID、重复 ID、保留显式 ID、XML 转义以及 save/read round-trip。
 4. 文件读写测试使用真实临时 SVG 文件，而不是仅模拟字符串。
 5. `tree`、`show` 和保存结果由测试检查关键结构与属性，使结构正确性和序列化正确性相互验证。
 
@@ -175,5 +192,5 @@ SVG 读回最初用一个 Map 同时计算所有图形的参数，读取 `<rect>
 
 ```text
 npm run typecheck
-npm test    # 21 passed, 0 failed
+npm test    # 22 passed, 0 failed
 ```

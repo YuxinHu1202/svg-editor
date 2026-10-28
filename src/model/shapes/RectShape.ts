@@ -27,6 +27,10 @@ export class RectShape extends Shape {
     this.height *= factor;
   }
 
+  public override positionSummary(): string {
+    return `(${this.formatNumber(this.x)},${this.formatNumber(this.y)})`;
+  }
+
   protected override getGeometryAttribute(name: string): string {
     if (name === "x") return this.formatNumber(this.x);
     if (name === "y") return this.formatNumber(this.y);

@@ -33,7 +33,7 @@ test("editing commands are atomic and support undo and redo", () => {
   cli.executeLine("move r1 20 5");
   assert.match(cli.executeLine("tree") ?? "", /x=30 y=25/);
 
-  assert.match(cli.executeLine("undo") ?? "", /^undid:/);
+  assert.equal(cli.executeLine("undo"), "rect#r1 moved back to (10,20)");
   assert.match(cli.executeLine("tree") ?? "", /x=10 y=20/);
   cli.executeLine("redo");
   assert.match(cli.executeLine("tree") ?? "", /x=30 y=25/);
@@ -107,9 +107,9 @@ test("delete, addto, set, and their undo operations preserve the tree", () => {
   assert.match(cli.executeLine("show r1") ?? "", /parent=g#scene/);
   cli.executeLine("set r1 width 20");
   assert.match(cli.executeLine("tree") ?? "", /w=20/);
-  cli.executeLine("delete r1");
+  assert.equal(cli.executeLine("delete r1"), "rect#r1 deleted");
   assert.equal(cli.executeLine("show r1"), "error: no such shape: r1");
-  cli.executeLine("undo");
+  assert.equal(cli.executeLine("undo"), "rect#r1 restored into g#scene");
   assert.match(cli.executeLine("show r1") ?? "", /width=20/);
 });
 
@@ -132,6 +132,6 @@ test("canvas changes create an IO history barrier until another edit", () => {
   assert.equal(cli.executeLine("canvas 100 200"), "canvas resized to 100x200");
   assert.equal(cli.executeLine("undo"), "error: undo not allowed after io command");
   cli.executeLine("move r1 1 1");
-  assert.match(cli.executeLine("undo") ?? "", /^undid:/);
+  assert.equal(cli.executeLine("undo"), "rect#r1 moved back to (0,0)");
   assert.equal(cli.executeLine("canvas"), "canvas 100x200");
 });

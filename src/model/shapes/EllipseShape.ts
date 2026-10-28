@@ -25,6 +25,10 @@ export class EllipseShape extends Shape {
     this.ry *= factor;
   }
 
+  public override positionSummary(): string {
+    return `(${this.formatNumber(this.cx)},${this.formatNumber(this.cy)})`;
+  }
+
   protected override getGeometryAttribute(name: string): string {
     if (name === "cx") return this.formatNumber(this.cx);
     if (name === "cy") return this.formatNumber(this.cy);

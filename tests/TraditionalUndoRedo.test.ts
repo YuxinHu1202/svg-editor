@@ -13,12 +13,12 @@ test("create and delete undo/redo restore the same shape at the same position", 
   cli.executeLine("redo");
   assert.match(cli.executeLine("show b") ?? "", /rect#b/);
 
-  cli.executeLine("delete a");
+  assert.equal(cli.executeLine("delete a"), "rect#a deleted");
   assert.equal(cli.executeLine("show a"), "error: no such shape: a");
-  cli.executeLine("undo");
+  assert.equal(cli.executeLine("undo"), "rect#a restored into svg");
   const restored = cli.executeLine("tree") ?? "";
   assert.ok(restored.indexOf("rect#a") < restored.indexOf("rect#b"));
-  cli.executeLine("redo");
+  assert.equal(cli.executeLine("redo"), "rect#a deleted");
   assert.equal(cli.executeLine("show a"), "error: no such shape: a");
 });
 
@@ -44,16 +44,30 @@ test("move and scale use inverse operations without document snapshots", () => {
   const cli = new CliApplication();
   cli.executeLine("init");
   cli.executeLine("create rect r1 10 20 30 40");
-  cli.executeLine("move r1 7 -3");
+  assert.equal(cli.executeLine("move r1 7 -3"), "rect#r1 moved to (17,17)");
   cli.executeLine("scale r1 2");
   assert.match(cli.executeLine("tree") ?? "", /x=34 y=34 w=60 h=80/);
   cli.executeLine("undo");
   assert.match(cli.executeLine("tree") ?? "", /x=17 y=17 w=30 h=40/);
-  cli.executeLine("undo");
+  assert.equal(cli.executeLine("undo"), "rect#r1 moved back to (10,20)");
   assert.match(cli.executeLine("tree") ?? "", /x=10 y=20 w=30 h=40/);
-  cli.executeLine("redo");
+  assert.equal(cli.executeLine("redo"), "rect#r1 moved to (17,17)");
   cli.executeLine("redo");
   assert.match(cli.executeLine("tree") ?? "", /x=34 y=34 w=60 h=80/);
+});
+
+test("move reports final coordinates for positioned shapes and deltas for groups", () => {
+  const cli = new CliApplication();
+  cli.executeLine("init");
+  cli.executeLine("create circle c1 100 100 20");
+  assert.equal(cli.executeLine("move c1 30 0"), "circle#c1 moved to (130,100)");
+  assert.equal(cli.executeLine("undo"), "circle#c1 moved back to (100,100)");
+  assert.equal(cli.executeLine("redo"), "circle#c1 moved to (130,100)");
+
+  cli.executeLine("create g g1");
+  cli.executeLine("addto g1 c1");
+  assert.equal(cli.executeLine("move g1 0 25"), "g#g1 moved by (0,25)");
+  assert.equal(cli.executeLine("undo"), "g#g1 moved back by (0,-25)");
 });
 
 test("group undo restores every original parent and sibling index", () => {
