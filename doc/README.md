@@ -194,3 +194,6 @@ circle#c1 moved to (130,100)
 npm run typecheck
 npm test    # 22 passed, 0 failed
 ```
+
+## git链接
+https://github.com/YuxinHu1202/svg-editor.git
